@@ -118,6 +118,20 @@ cursor:pointer;
 Cloud Computing - 2026
 </div>
 </div>
+<p id="visites"></p>
 
+<script>
+let visites = localStorage.getItem("visites");
+
+if(visites === null){
+  visites = 1;
+}else{
+  visites = Number(visites) + 1;
+}
+
+localStorage.setItem("visites", visites);
+document.getElementById("visites").innerHTML =
+"Nombre de visites sur ce navigateur : " + visites;
+</script>
 </body>
 </html>
