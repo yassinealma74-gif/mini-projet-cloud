@@ -151,5 +151,62 @@ localStorage.setItem("visites", visites);
 document.getElementById("visites").innerHTML =
 "Nombre de visites sur ce navigateur : " + visites;
 </script>
+ <h2>Mini Cloud Storage</h2>
+
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload</button>
+
+<ul id="fileList"></ul>
+
+<script>
+function uploadFile(){
+  let input = document.getElementById("fileInput");
+  let file = input.files[0];
+
+  if(!file){
+    alert("Choisir un fichier !");
+    return;
+  }
+
+  let reader = new FileReader();
+
+  reader.onload = function(e){
+    let data = e.target.result;
+
+    let files = JSON.parse(localStorage.getItem("files")) || [];
+
+    files.push({
+      name: file.name,
+      content: data
+    });
+
+    localStorage.setItem("files", JSON.stringify(files));
+    afficherFiles();
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function afficherFiles(){
+  let list = document.getElementById("fileList");
+  list.innerHTML = "";
+
+  let files = JSON.parse(localStorage.getItem("files")) || [];
+
+  files.forEach(f => {
+    let li = document.createElement("li");
+    let link = document.createElement("a");
+
+    link.href = f.content;
+    link.textContent = f.name;
+    link.target = "_blank";
+
+    li.appendChild(link);
+    list.appendChild(li);
+  });
+}
+
+afficherFiles();
+</script>
 </body>
 </html>
