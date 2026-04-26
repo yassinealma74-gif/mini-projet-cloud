@@ -208,57 +208,57 @@ function afficherFiles(){
 
 afficherFiles();
 </script>
- <h2>Mini Cloud Storage (Supabase)</h2>
+<h2>Mini Cloud Storage (Supabase)</h2>
 
-<input type="file" id="fileInput">
-<button onclick="uploadFile()">Upload</button>
+<input type="file" id="fileInputSupabase">
+<button onclick="uploadFileSupabase()">Upload</button>
 
-<ul id="fileList"></ul>
+<ul id="fileListSupabase"></ul>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
 const supabaseUrl = "https://zkvkmvylqsaggpxedfzz.supabase.co";
-const supabaseKey = "PUT_YOUR_KEY_HERE";
+const supabaseKey = "PUT_YOUR_KEY_HERE"; // حط key ديالك هنا
 
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-async function uploadFile(){
-  let file = document.getElementById("fileInput").files[0];
+async function uploadFileSupabase(){
+  let file = document.getElementById("fileInputSupabase").files[0];
 
   if(!file){
     alert("Choisir un fichier");
     return;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .storage
     .from("files")
-    .upload(file.name, file);
+    .upload(Date.now() + "_" + file.name, file);
 
   if(error){
     alert("Erreur upload");
     console.log(error);
   } else {
     alert("Upload réussi");
-    afficherFiles();
+    afficherFilesSupabase();
   }
 }
 
-async function afficherFiles(){
-  const { data, error } = await supabase
+async function afficherFilesSupabase(){
+  const { data, error } = await supabaseClient
     .storage
     .from("files")
     .list();
 
-  let list = document.getElementById("fileList");
+  let list = document.getElementById("fileListSupabase");
   list.innerHTML = "";
 
   data.forEach(file => {
     let li = document.createElement("li");
     let link = document.createElement("a");
 
-    const publicURL = supabase
+    const publicURL = supabaseClient
       .storage
       .from("files")
       .getPublicUrl(file.name).data.publicUrl;
@@ -272,7 +272,7 @@ async function afficherFiles(){
   });
 }
 
-afficherFiles();
+afficherFilesSupabase();
 </script>
 </body>
 </html>
