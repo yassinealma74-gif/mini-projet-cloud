@@ -1,33 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mini Projet Cloud</title>
+
 <style>
 body{
-font-family: Arial;
+margin:0;
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
 text-align:center;
-background:#f2f2f2;
-padding:50px;
 }
-div{
-background:white;
-padding:30px;
-border-radius:15px;
+
+.container{
+margin-top:80px;
+padding:40px;
 width:80%;
-margin:auto;
-box-shadow:0 0 10px gray;
+max-width:700px;
+margin-left:auto;
+margin-right:auto;
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
-h1{color:#0077ff;}
+
+h1{
+font-size:42px;
+margin-bottom:10px;
+}
+
+p{
+font-size:20px;
+line-height:1.6;
+}
+
+.btn{
+display:inline-block;
+margin-top:20px;
+padding:12px 25px;
+background:#00c6ff;
+color:white;
+text-decoration:none;
+border-radius:10px;
+font-weight:bold;
+}
+
+.footer{
+margin-top:40px;
+font-size:14px;
+opacity:0.7;
+}
 </style>
 </head>
 
 <body>
-<div>
-<h1>Bienvenue dans mon projet Cloud</h1>
-<h2>Réalisé par Yassine</h2>
-<p>Ce site est déployé automatiquement depuis GitHub vers Netlify Cloud.</p>
-<p>Accessible partout dans le monde via Internet.</p>
+
+<div class="container">
+<h1>☁️ Mini Projet Cloud</h1>
+<p>Développé par Yassine</p>
+<p>Site hébergé sur Netlify Cloud</p>
+<p>Déploiement automatique depuis GitHub</p>
+
+<a class="btn" href="#">Projet en ligne</a>
+
+<div class="footer">
+Cloud Computing - 2026
 </div>
+</div>
+
 </body>
 </html>
