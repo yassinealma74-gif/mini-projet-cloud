@@ -74,7 +74,17 @@ opacity:0.7;
 <p>Site hébergé sur Netlify Cloud</p>
 <p>Déploiement automatique depuis GitHub</p>
 
-<a class="btn" href="#">Projet en ligne</a>
+<a class="btn" href="#contact">Contact</a>
+
+<form id="contact" name="contact" method="POST" data-netlify="true">
+  <h2>Contact</h2>
+
+  <input type="text" name="nom" placeholder="Votre nom" required>
+  <input type="email" name="email" placeholder="Votre email" required>
+  <textarea name="message" placeholder="Votre message" required></textarea>
+
+  <button type="submit">Envoyer</button>
+</form>
 
 <div class="footer">
 Cloud Computing - 2026
