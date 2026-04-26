@@ -208,5 +208,71 @@ function afficherFiles(){
 
 afficherFiles();
 </script>
+ <h2>Mini Cloud Storage (Supabase)</h2>
+
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload</button>
+
+<ul id="fileList"></ul>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabaseUrl = "https://zkvkmvylqsaggpxedfzz.supabase.co";
+const supabaseKey = "PUT_YOUR_KEY_HERE";
+
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function uploadFile(){
+  let file = document.getElementById("fileInput").files[0];
+
+  if(!file){
+    alert("Choisir un fichier");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .storage
+    .from("files")
+    .upload(file.name, file);
+
+  if(error){
+    alert("Erreur upload");
+    console.log(error);
+  } else {
+    alert("Upload réussi");
+    afficherFiles();
+  }
+}
+
+async function afficherFiles(){
+  const { data, error } = await supabase
+    .storage
+    .from("files")
+    .list();
+
+  let list = document.getElementById("fileList");
+  list.innerHTML = "";
+
+  data.forEach(file => {
+    let li = document.createElement("li");
+    let link = document.createElement("a");
+
+    const publicURL = supabase
+      .storage
+      .from("files")
+      .getPublicUrl(file.name).data.publicUrl;
+
+    link.href = publicURL;
+    link.textContent = file.name;
+    link.target = "_blank";
+
+    li.appendChild(link);
+    list.appendChild(li);
+  });
+}
+
+afficherFiles();
+</script>
 </body>
 </html>
