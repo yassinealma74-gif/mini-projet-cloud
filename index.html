@@ -24,15 +24,10 @@ body{
   box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
-h1{
-  font-size:42px;
-}
+h1{font-size:42px;}
+p{font-size:18px;}
 
-p{
-  font-size:18px;
-}
-
-.btn, button{
+button{
   padding:12px 25px;
   background:#00c6ff;
   color:white;
@@ -42,13 +37,6 @@ p{
   cursor:pointer;
 }
 
-form{
-  margin-top:30px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
 input, textarea{
   padding:12px;
   border:none;
@@ -56,9 +44,14 @@ input, textarea{
   font-size:16px;
 }
 
-textarea{
-  height:100px;
+form{
+  margin-top:30px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
+
+textarea{height:100px;}
 
 .dashboard{
   margin-top:30px;
@@ -155,12 +148,12 @@ a{
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 /* Heure live */
 function afficherHeure(){
-  let maintenant = new Date();
+  const maintenant = new Date();
   document.getElementById("heure").innerHTML =
   "Heure actuelle : " + maintenant.toLocaleTimeString();
 }
@@ -169,35 +162,35 @@ afficherHeure();
 
 /* Compteur visites */
 let visites = localStorage.getItem("visites");
-
 if(visites === null){
   visites = 1;
 }else{
   visites = Number(visites) + 1;
 }
-
 localStorage.setItem("visites", visites);
 document.getElementById("visites").innerHTML =
 "Nombre de visites sur ce navigateur : " + visites;
 
-/* Supabase Storage */
+/* Supabase */
 const supabaseUrl = "https://zkvkmvylqsaggpxedfzz.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIs...";
+const supabaseKey = "sb_publishable_N5LNKKFsCb7_8xYB7TpDSg_-Zfffme8";
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 async function uploadFileSupabase(){
-  let file = document.getElementById("fileInputSupabase").files[0];
-  let message = document.getElementById("uploadMessage");
+  const file = document.getElementById("fileInputSupabase").files[0];
+  const message = document.getElementById("uploadMessage");
 
   if(!file){
     message.innerHTML = "Veuillez choisir un fichier.";
     return;
   }
 
-  let fileName = Date.now() + "_" + file.name;
+  message.innerHTML = "Upload en cours...";
 
-  const { data, error } = await supabaseClient
+  const fileName = Date.now() + "_" + file.name;
+
+  const { error } = await supabaseClient
     .storage
     .from("files")
     .upload(fileName, file);
@@ -205,20 +198,20 @@ async function uploadFileSupabase(){
   if(error){
     message.innerHTML = "Erreur lors de l'upload.";
     console.log(error);
-  } else {
+  }else{
     message.innerHTML = "Upload réussi ✅";
     afficherFilesSupabase();
   }
 }
 
 async function afficherFilesSupabase(){
+  const list = document.getElementById("fileListSupabase");
+  list.innerHTML = "Chargement...";
+
   const { data, error } = await supabaseClient
     .storage
     .from("files")
     .list();
-
-  let list = document.getElementById("fileListSupabase");
-  list.innerHTML = "";
 
   if(error){
     list.innerHTML = "<li>Erreur chargement fichiers</li>";
@@ -226,9 +219,16 @@ async function afficherFilesSupabase(){
     return;
   }
 
+  list.innerHTML = "";
+
+  if(data.length === 0){
+    list.innerHTML = "<li>Aucun fichier trouvé</li>";
+    return;
+  }
+
   data.forEach(file => {
-    let li = document.createElement("li");
-    let link = document.createElement("a");
+    const li = document.createElement("li");
+    const link = document.createElement("a");
 
     const publicURL = supabaseClient
       .storage
