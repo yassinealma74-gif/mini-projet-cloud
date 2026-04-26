@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mini Projet Cloud</title>
+ <p id="heure"></p>
+
+<script>
+function afficherHeure(){
+let maintenant = new Date();
+document.getElementById("heure").innerHTML =
+"Heure actuelle : " + maintenant.toLocaleTimeString();
+}
+
+setInterval(afficherHeure,1000);
+</script>
 
 <style>
 body{
