@@ -14,7 +14,7 @@ body{
   text-align:center;
 }
 .container{
-  margin:60px auto;
+  margin:80px auto;
   padding:40px;
   width:80%;
   max-width:800px;
@@ -22,40 +22,41 @@ body{
   border-radius:20px;
 }
 button{
-  padding:10px 20px;
+  padding:12px 25px;
   background:#00c6ff;
   border:none;
   border-radius:10px;
   color:white;
+  font-weight:bold;
   cursor:pointer;
 }
-ul{list-style:none;}
-a{color:#00c6ff;}
+ul{list-style:none; padding:0;}
+li{margin:10px;}
+a{color:#00c6ff; font-weight:bold;}
 </style>
 </head>
 
 <body>
 
 <div class="container">
+  <h1>📁 Mini Cloud Storage</h1>
 
-<h1>Mini Cloud Storage</h1>
+  <input type="file" id="fileInput">
+  <button onclick="uploadFile()">Upload</button>
 
-<input type="file" id="fileInput">
-<button onclick="uploadFile()">Upload</button>
+  <p id="msg"></p>
 
-<p id="msg"></p>
-
-<ul id="list"></ul>
-
+  <h3>Fichiers stockés dans le Cloud</h3>
+  <ul id="list"></ul>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 const supabaseUrl = "https://zkvkmvylqsaggpxedfzz.supabase.co";
-const supabaseKey = "sb_publishable_N5LNKFKScb7_8xYB7TpDSg__Zffme8";
+const supabaseKey = "sb_publishable_N5LNKFKScb7_8xYB7TpDSg_-Zfffme8";
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 async function uploadFile(){
   const file = document.getElementById("fileInput").files[0];
@@ -66,11 +67,11 @@ async function uploadFile(){
     return;
   }
 
-  msg.innerHTML = "Uploading...";
+  msg.innerHTML = "Upload en cours...";
 
   const fileName = Date.now() + "_" + file.name;
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .storage
     .from("files")
     .upload(fileName, file);
@@ -85,26 +86,29 @@ async function uploadFile(){
 }
 
 async function loadFiles(){
-  const { data, error } = await supabase
+  const list = document.getElementById("list");
+  list.innerHTML = "Chargement...";
+
+  const { data, error } = await supabaseClient
     .storage
     .from("files")
     .list();
 
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
   if(error){
     list.innerHTML = "Erreur chargement ❌";
+    console.log(error);
     return;
   }
 
+  list.innerHTML = "";
+
   data.forEach(file => {
-    const url = supabase
+    const publicURL = supabaseClient
       .storage
       .from("files")
       .getPublicUrl(file.name).data.publicUrl;
 
-    list.innerHTML += `<li><a href="${url}" target="_blank">${file.name}</a></li>`;
+    list.innerHTML += `<li><a href="${publicURL}" target="_blank">${file.name}</a></li>`;
   });
 }
 
