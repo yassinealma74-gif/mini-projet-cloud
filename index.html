@@ -3,100 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Projet Cloud Storage</title>
+<title>Mini Cloud Storage</title>
 
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
   text-align:center;
 }
-
 .container{
   margin:60px auto;
   padding:40px;
   width:80%;
-  max-width:850px;
+  max-width:800px;
   background:rgba(255,255,255,0.08);
   border-radius:20px;
-  box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
-
-h1{font-size:42px;}
-p{font-size:18px;}
-
 button{
-  padding:12px 25px;
+  padding:10px 20px;
   background:#00c6ff;
-  color:white;
   border:none;
   border-radius:10px;
-  font-weight:bold;
+  color:white;
   cursor:pointer;
 }
-
-input, textarea{
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-}
-
-form{
-  margin-top:30px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-textarea{height:100px;}
-
-.dashboard{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:15px;
-}
-
-.card{
-  background:rgba(255,255,255,0.12);
-  padding:15px;
-  border-radius:15px;
-}
-
-.storage{
-  margin-top:40px;
-  background:rgba(255,255,255,0.10);
-  padding:25px;
-  border-radius:15px;
-}
-
-ul{
-  list-style:none;
-  padding:0;
-}
-
-li{
-  margin:10px;
-}
-
-a{
-  color:#00c6ff;
-  font-weight:bold;
-}
-
-.message{
-  margin-top:15px;
-  font-weight:bold;
-}
-
-.footer{
-  margin-top:40px;
-  font-size:14px;
-  opacity:0.7;
-}
+ul{list-style:none;}
+a{color:#00c6ff;}
 </style>
 </head>
 
@@ -104,147 +38,77 @@ a{
 
 <div class="container">
 
-  <h1>☁️ Mini Projet Cloud Storage</h1>
+<h1>Mini Cloud Storage</h1>
 
-  <p>Développé par Yassine</p>
-  <p>Site hébergé sur Netlify Cloud</p>
-  <p>Déploiement automatique depuis GitHub</p>
-  <p id="heure"></p>
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload</button>
 
-  <div class="dashboard">
-    <div class="card">☁️ Cloud Hosting: Netlify</div>
-    <div class="card">🔁 Déploiement: Automatique</div>
-    <div class="card">💻 Code: GitHub</div>
-    <div class="card">📦 Storage: Supabase</div>
-    <div class="card">🌍 Accès: Public Internet</div>
-  </div>
+<p id="msg"></p>
 
-  <form id="contact" name="contact" method="POST" data-netlify="true">
-    <h2>Contact</h2>
-    <input type="text" name="nom" placeholder="Votre nom" required>
-    <input type="email" name="email" placeholder="Votre email" required>
-    <textarea name="message" placeholder="Votre message" required></textarea>
-    <button type="submit">Envoyer</button>
-  </form>
-
-  <p id="visites"></p>
-
-  <div class="storage">
-    <h2>📁 Mini Cloud Storage</h2>
-    <p>Uploader un fichier vers Supabase Cloud Storage</p>
-
-    <input type="file" id="fileInputSupabase">
-    <button onclick="uploadFileSupabase()">Upload</button>
-
-    <p id="uploadMessage" class="message"></p>
-
-    <h3>Fichiers stockés dans le Cloud</h3>
-    <ul id="fileListSupabase"></ul>
-  </div>
-
-  <div class="footer">
-    Cloud Computing - 2026
-  </div>
+<ul id="list"></ul>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-/* Heure live */
-function afficherHeure(){
-  const maintenant = new Date();
-  document.getElementById("heure").innerHTML =
-  "Heure actuelle : " + maintenant.toLocaleTimeString();
-}
-setInterval(afficherHeure,1000);
-afficherHeure();
-
-/* Compteur visites */
-let visites = localStorage.getItem("visites");
-if(visites === null){
-  visites = 1;
-}else{
-  visites = Number(visites) + 1;
-}
-localStorage.setItem("visites", visites);
-document.getElementById("visites").innerHTML =
-"Nombre de visites sur ce navigateur : " + visites;
-
-/* Supabase */
 const supabaseUrl = "https://zkvkmvylqsaggpxedfzz.supabase.co";
-const supabaseKey = "sb_publishable_N5LNKKFsCb7_8xYB7TpDSg_-Zfffme8";
+const supabaseKey = "sb_publishable_N5LNKFKScb7_8xYB7TpDSg__Zffme8";
 
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-async function uploadFileSupabase(){
-  const file = document.getElementById("fileInputSupabase").files[0];
-  const message = document.getElementById("uploadMessage");
+async function uploadFile(){
+  const file = document.getElementById("fileInput").files[0];
+  const msg = document.getElementById("msg");
 
   if(!file){
-    message.innerHTML = "Veuillez choisir un fichier.";
+    msg.innerHTML = "Choisir un fichier";
     return;
   }
 
-  message.innerHTML = "Upload en cours...";
+  msg.innerHTML = "Uploading...";
 
   const fileName = Date.now() + "_" + file.name;
 
-  const { error } = await supabaseClient
+  const { error } = await supabase
     .storage
     .from("files")
     .upload(fileName, file);
 
   if(error){
-    message.innerHTML = "Erreur lors de l'upload.";
+    msg.innerHTML = "Erreur upload ❌";
     console.log(error);
   }else{
-    message.innerHTML = "Upload réussi ✅";
-    afficherFilesSupabase();
+    msg.innerHTML = "Upload réussi ✅";
+    loadFiles();
   }
 }
 
-async function afficherFilesSupabase(){
-  const list = document.getElementById("fileListSupabase");
-  list.innerHTML = "Chargement...";
-
-  const { data, error } = await supabaseClient
+async function loadFiles(){
+  const { data, error } = await supabase
     .storage
     .from("files")
     .list();
 
-  if(error){
-    list.innerHTML = "<li>Erreur chargement fichiers</li>";
-    console.log(error);
-    return;
-  }
-
+  const list = document.getElementById("list");
   list.innerHTML = "";
 
-  if(data.length === 0){
-    list.innerHTML = "<li>Aucun fichier trouvé</li>";
+  if(error){
+    list.innerHTML = "Erreur chargement ❌";
     return;
   }
 
   data.forEach(file => {
-    const li = document.createElement("li");
-    const link = document.createElement("a");
-
-    const publicURL = supabaseClient
+    const url = supabase
       .storage
       .from("files")
       .getPublicUrl(file.name).data.publicUrl;
 
-    link.href = publicURL;
-    link.textContent = file.name;
-    link.target = "_blank";
-
-    li.appendChild(link);
-    list.appendChild(li);
+    list.innerHTML += `<li><a href="${url}" target="_blank">${file.name}</a></li>`;
   });
 }
 
-afficherFilesSupabase();
+loadFiles();
 </script>
 
 </body>
