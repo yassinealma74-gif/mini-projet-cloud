@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Cloud Storage</title>
+<title>Mini Cloud Drive Sécurisé</title>
 
 <style>
 body{
@@ -14,71 +14,165 @@ body{
   text-align:center;
 }
 .container{
-  margin:80px auto;
-  padding:40px;
-  width:80%;
-  max-width:800px;
-  background:rgba(255,255,255,0.08);
+  margin:50px auto;
+  padding:35px;
+  width:85%;
+  max-width:850px;
+  background:rgba(255,255,255,0.09);
   border-radius:20px;
 }
+input{
+  padding:12px;
+  margin:8px;
+  border-radius:8px;
+  border:none;
+}
 button{
-  padding:12px 25px;
+  padding:12px 22px;
+  margin:8px;
   background:#00c6ff;
+  color:white;
   border:none;
   border-radius:10px;
-  color:white;
   font-weight:bold;
   cursor:pointer;
 }
-ul{list-style:none; padding:0;}
-li{margin:10px;}
-a{color:#00c6ff; font-weight:bold;}
+.storage{
+  margin-top:30px;
+  padding:25px;
+  background:rgba(255,255,255,0.10);
+  border-radius:15px;
+}
+ul{list-style:none;padding:0;}
+li{margin:12px;}
+a{color:#00c6ff;font-weight:bold;}
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h1>📁 Mini Cloud Storage</h1>
 
-  <input type="file" id="fileInput">
-  <button onclick="uploadFile()">Upload</button>
+<h1>🔐 Mini Cloud Drive Sécurisé</h1>
+<p>Chaque utilisateur possède son propre espace de stockage Cloud</p>
 
-  <p id="msg"></p>
+<div id="auth">
+  <h2>Connexion</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Mot de passe">
+  <br>
+  <button onclick="signUp()">Créer un compte</button>
+  <button onclick="login()">Se connecter</button>
+  <p id="authMsg"></p>
+</div>
 
-  <h3>Fichiers stockés dans le Cloud</h3>
-  <ul id="list"></ul>
+<div id="app" class="hidden">
+  <h2>Bienvenue 👋</h2>
+  <p id="userEmail"></p>
+  <button onclick="logout()">Déconnexion</button>
+
+  <div class="storage">
+    <h2>📁 Mon espace Cloud privé</h2>
+
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload</button>
+
+    <p id="msg"></p>
+
+    <h3>Mes fichiers</h3>
+    <ul id="fileList"></ul>
+  </div>
+</div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://zkykmvylqsaggpxedfzq.supabase.co"; 
+const supabaseUrl = "https://zkykmvylqsaggpxedfzq.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpreWttdnlscXNhZ2dweGVkZnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjkxMDcsImV4cCI6MjA5MjgwNTEwN30.OjjounE02YBPcVvGFb8wTRD7FTzp0-Pcuy06Imz3KIc";
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+let currentUser = null;
+
+async function signUp(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if(error){
+    document.getElementById("authMsg").innerHTML = "Erreur: " + error.message;
+  }else{
+    document.getElementById("authMsg").innerHTML = "Compte créé ✅ Connecte-toi maintenant.";
+  }
+}
+
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if(error){
+    document.getElementById("authMsg").innerHTML = "Erreur: " + error.message;
+  }else{
+    currentUser = data.user;
+    showApp();
+  }
+}
+
+async function logout(){
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  document.getElementById("auth").classList.remove("hidden");
+  document.getElementById("app").classList.add("hidden");
+}
+
+async function checkSession(){
+  const { data } = await supabaseClient.auth.getSession();
+
+  if(data.session){
+    currentUser = data.session.user;
+    showApp();
+  }
+}
+
+function showApp(){
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("userEmail").innerHTML = "Connecté avec : " + currentUser.email;
+  loadFiles();
+}
 
 async function uploadFile(){
   const file = document.getElementById("fileInput").files[0];
   const msg = document.getElementById("msg");
 
   if(!file){
-    msg.innerHTML = "Choisir un fichier";
+    msg.innerHTML = "Choisir un fichier.";
     return;
   }
 
-  msg.innerHTML = "Upload en cours...";
+  const filePath = currentUser.id + "/" + Date.now() + "_" + file.name;
 
-  const fileName = Date.now() + "_" + file.name;
+  msg.innerHTML = "Upload en cours...";
 
   const { error } = await supabaseClient
     .storage
     .from("files")
-    .upload(fileName, file);
+    .upload(filePath, file);
 
   if(error){
-    msg.innerHTML = "Erreur upload ❌";
-    console.log(error);
+    msg.innerHTML = "Erreur upload ❌ " + error.message;
   }else{
     msg.innerHTML = "Upload réussi ✅";
     loadFiles();
@@ -86,33 +180,57 @@ async function uploadFile(){
 }
 
 async function loadFiles(){
-  const list = document.getElementById("list");
+  const list = document.getElementById("fileList");
   list.innerHTML = "Chargement...";
 
   const { data, error } = await supabaseClient
     .storage
     .from("files")
-    .list();
+    .list(currentUser.id);
 
   if(error){
-    list.innerHTML = "Erreur chargement ❌";
-    console.log(error);
+    list.innerHTML = "Erreur chargement ❌ " + error.message;
     return;
   }
 
   list.innerHTML = "";
 
-  data.forEach(file => {
-    const publicURL = supabaseClient
+  if(data.length === 0){
+    list.innerHTML = "<li>Aucun fichier</li>";
+    return;
+  }
+
+  for(const file of data){
+    const filePath = currentUser.id + "/" + file.name;
+
+    const { data: signedData } = await supabaseClient
       .storage
       .from("files")
-      .getPublicUrl(file.name).data.publicUrl;
+      .createSignedUrl(filePath, 3600);
 
-    list.innerHTML += `<li><a href="${publicURL}" target="_blank">${file.name}</a></li>`;
-  });
+    list.innerHTML += `
+      <li>
+        <a href="${signedData.signedUrl}" target="_blank">${file.name}</a>
+        <button onclick="deleteFile('${filePath}')">Supprimer</button>
+      </li>
+    `;
+  }
 }
 
-loadFiles();
+async function deleteFile(filePath){
+  const { error } = await supabaseClient
+    .storage
+    .from("files")
+    .remove([filePath]);
+
+  if(error){
+    alert("Erreur suppression");
+  }else{
+    loadFiles();
+  }
+}
+
+checkSession();
 </script>
 
 </body>
