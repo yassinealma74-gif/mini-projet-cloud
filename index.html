@@ -3,88 +3,278 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Cloud Drive Sécurisé</title>
+<title>Mini Cloud Drive</title>
 
 <style>
+*{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
+  background:#f5f7fb;
+  color:#1f2937;
+}
+
+.login-page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:white;
+}
+
+.login-card{
+  width:90%;
+  max-width:420px;
+  background:white;
+  padding:35px;
+  border-radius:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25);
   text-align:center;
 }
-.container{
-  margin:50px auto;
-  padding:35px;
-  width:85%;
-  max-width:850px;
-  background:rgba(255,255,255,0.09);
-  border-radius:20px;
+
+.login-card h1{
+  margin-bottom:10px;
 }
-input{
-  padding:12px;
-  margin:8px;
-  border-radius:8px;
-  border:none;
+
+.login-card input{
+  width:100%;
+  margin:10px 0;
+  padding:14px;
+  border:1px solid #ddd;
+  border-radius:12px;
 }
+
 button{
-  padding:12px 22px;
-  margin:8px;
-  background:#00c6ff;
-  color:white;
   border:none;
-  border-radius:10px;
-  font-weight:bold;
+  border-radius:12px;
+  padding:12px 18px;
   cursor:pointer;
+  font-weight:bold;
 }
-.storage{
-  margin-top:30px;
+
+.primary{
+  background:#1a73e8;
+  color:white;
+}
+
+.secondary{
+  background:#e8f0fe;
+  color:#1a73e8;
+}
+
+.danger{
+  background:#ffe8e8;
+  color:#d93025;
+}
+
+.app{
+  display:none;
+  min-height:100vh;
+}
+
+.sidebar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:230px;
+  height:100vh;
+  background:#ffffff;
+  border-right:1px solid #e5e7eb;
+  padding:22px;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  margin-bottom:35px;
+  color:#1a73e8;
+}
+
+.menu-item{
+  padding:13px;
+  border-radius:12px;
+  margin-bottom:8px;
+  background:#e8f0fe;
+  color:#1a73e8;
+  font-weight:bold;
+}
+
+.main{
+  margin-left:230px;
   padding:25px;
-  background:rgba(255,255,255,0.10);
-  border-radius:15px;
 }
-ul{list-style:none;padding:0;}
-li{margin:12px;}
-a{color:#00c6ff;font-weight:bold;}
-.hidden{display:none;}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:white;
+  padding:18px 22px;
+  border-radius:18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+
+.search{
+  width:45%;
+  padding:13px;
+  border:1px solid #ddd;
+  border-radius:30px;
+}
+
+.user-box{
+  text-align:right;
+  font-size:14px;
+}
+
+.upload-box{
+  margin-top:25px;
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+
+.upload-zone{
+  border:2px dashed #1a73e8;
+  padding:30px;
+  border-radius:18px;
+  text-align:center;
+  background:#f8fbff;
+}
+
+.files-header{
+  margin-top:30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.grid{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:18px;
+}
+
+.file-card{
+  background:white;
+  padding:18px;
+  border-radius:18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);
+  transition:.2s;
+}
+
+.file-card:hover{
+  transform:translateY(-3px);
+}
+
+.file-icon{
+  font-size:38px;
+  margin-bottom:12px;
+}
+
+.file-name{
+  font-weight:bold;
+  word-break:break-word;
+  margin-bottom:14px;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.actions a{
+  text-decoration:none;
+}
+
+.msg{
+  margin-top:15px;
+  font-weight:bold;
+  color:#1a73e8;
+}
+
+.hidden{display:none}
+
+@media(max-width:800px){
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+  }
+
+  .main{
+    margin-left:0;
+  }
+
+  .topbar{
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .search{
+    width:100%;
+  }
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div id="authPage" class="login-page">
+  <div class="login-card">
+    <h1>🔐 Mini Cloud Drive</h1>
+    <p>Connexion sécurisée</p>
 
-<h1>🔐 Mini Cloud Drive Sécurisé</h1>
-<p>Chaque utilisateur possède son propre espace de stockage Cloud</p>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Mot de passe">
 
-<div id="auth">
-  <h2>Connexion</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Mot de passe">
-  <br>
-  <button onclick="signUp()">Créer un compte</button>
-  <button onclick="login()">Se connecter</button>
-  <p id="authMsg"></p>
-</div>
+    <button class="primary" onclick="login()">Se connecter</button>
+    <button class="secondary" onclick="signUp()">Créer un compte</button>
 
-<div id="app" class="hidden">
-  <h2>Bienvenue 👋</h2>
-  <p id="userEmail"></p>
-  <button onclick="logout()">Déconnexion</button>
-
-  <div class="storage">
-    <h2>📁 Mon espace Cloud privé</h2>
-
-    <input type="file" id="fileInput">
-    <button onclick="uploadFile()">Upload</button>
-
-    <p id="msg"></p>
-
-    <h3>Mes fichiers</h3>
-    <ul id="fileList"></ul>
+    <p id="authMsg"></p>
   </div>
 </div>
 
+<div id="appPage" class="app">
+
+  <div class="sidebar">
+    <div class="logo">☁️ CloudDrive</div>
+    <div class="menu-item">📁 Mes fichiers</div>
+    <div class="menu-item">🔒 Espace privé</div>
+    <div class="menu-item">☁️ Supabase Storage</div>
+  </div>
+
+  <div class="main">
+
+    <div class="topbar">
+      <input class="search" id="searchInput" placeholder="Rechercher un fichier..." onkeyup="renderFiles()">
+
+      <div class="user-box">
+        <div id="userEmail"></div>
+        <button class="danger" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="upload-box">
+      <h2>Uploader un fichier</h2>
+      <div class="upload-zone">
+        <input type="file" id="fileInput">
+        <button class="primary" onclick="uploadFile()">Upload</button>
+        <p id="msg" class="msg"></p>
+      </div>
+    </div>
+
+    <div class="files-header">
+      <h2>Mes fichiers</h2>
+      <button class="secondary" onclick="loadFiles()">Actualiser</button>
+    </div>
+
+    <div id="fileGrid" class="grid"></div>
+
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -96,45 +286,39 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let currentUser = null;
+let filesData = [];
 
 async function signUp(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password
-  });
+  const { error } = await supabaseClient.auth.signUp({ email, password });
 
-  if(error){
-    document.getElementById("authMsg").innerHTML = "Erreur: " + error.message;
-  }else{
-    document.getElementById("authMsg").innerHTML = "Compte créé ✅ Connecte-toi maintenant.";
-  }
+  document.getElementById("authMsg").innerHTML =
+    error ? "Erreur: " + error.message : "Compte créé ✅ Connecte-toi.";
 }
 
 async function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if(error){
     document.getElementById("authMsg").innerHTML = "Erreur: " + error.message;
-  }else{
-    currentUser = data.user;
-    showApp();
+    return;
   }
+
+  currentUser = data.user;
+  showApp();
 }
 
 async function logout(){
   await supabaseClient.auth.signOut();
   currentUser = null;
-  document.getElementById("auth").classList.remove("hidden");
-  document.getElementById("app").classList.add("hidden");
+  filesData = [];
+  document.getElementById("authPage").style.display = "flex";
+  document.getElementById("appPage").style.display = "none";
 }
 
 async function checkSession(){
@@ -147,9 +331,9 @@ async function checkSession(){
 }
 
 function showApp(){
-  document.getElementById("auth").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  document.getElementById("userEmail").innerHTML = "Connecté avec : " + currentUser.email;
+  document.getElementById("authPage").style.display = "none";
+  document.getElementById("appPage").style.display = "block";
+  document.getElementById("userEmail").innerHTML = "Connecté: " + currentUser.email;
   loadFiles();
 }
 
@@ -158,13 +342,13 @@ async function uploadFile(){
   const msg = document.getElementById("msg");
 
   if(!file){
-    msg.innerHTML = "Choisir un fichier.";
+    msg.innerHTML = "Veuillez choisir un fichier.";
     return;
   }
 
-  const filePath = currentUser.id + "/" + Date.now() + "_" + file.name;
-
   msg.innerHTML = "Upload en cours...";
+
+  const filePath = currentUser.id + "/" + Date.now() + "_" + file.name;
 
   const { error } = await supabaseClient
     .storage
@@ -175,13 +359,14 @@ async function uploadFile(){
     msg.innerHTML = "Erreur upload ❌ " + error.message;
   }else{
     msg.innerHTML = "Upload réussi ✅";
+    document.getElementById("fileInput").value = "";
     loadFiles();
   }
 }
 
 async function loadFiles(){
-  const list = document.getElementById("fileList");
-  list.innerHTML = "Chargement...";
+  const grid = document.getElementById("fileGrid");
+  grid.innerHTML = "Chargement...";
 
   const { data, error } = await supabaseClient
     .storage
@@ -189,18 +374,30 @@ async function loadFiles(){
     .list(currentUser.id);
 
   if(error){
-    list.innerHTML = "Erreur chargement ❌ " + error.message;
+    grid.innerHTML = "Erreur chargement ❌ " + error.message;
     return;
   }
 
-  list.innerHTML = "";
+  filesData = data || [];
+  renderFiles();
+}
 
-  if(data.length === 0){
-    list.innerHTML = "<li>Aucun fichier</li>";
+async function renderFiles(){
+  const grid = document.getElementById("fileGrid");
+  const search = document.getElementById("searchInput").value.toLowerCase();
+
+  const filtered = filesData.filter(file =>
+    file.name.toLowerCase().includes(search)
+  );
+
+  grid.innerHTML = "";
+
+  if(filtered.length === 0){
+    grid.innerHTML = "<p>Aucun fichier trouvé</p>";
     return;
   }
 
-  for(const file of data){
+  for(const file of filtered){
     const filePath = currentUser.id + "/" + file.name;
 
     const { data: signedData } = await supabaseClient
@@ -208,23 +405,44 @@ async function loadFiles(){
       .from("files")
       .createSignedUrl(filePath, 3600);
 
-    list.innerHTML += `
-      <li>
-        <a href="${signedData.signedUrl}" target="_blank">${file.name}</a>
-        <button onclick="deleteFile('${filePath}')">Supprimer</button>
-      </li>
+    const icon = getFileIcon(file.name);
+
+    grid.innerHTML += `
+      <div class="file-card">
+        <div class="file-icon">${icon}</div>
+        <div class="file-name">${file.name}</div>
+        <div class="actions">
+          <a href="${signedData.signedUrl}" target="_blank">
+            <button class="secondary">Ouvrir</button>
+          </a>
+          <button class="danger" onclick="deleteFile('${filePath}')">Supprimer</button>
+        </div>
+      </div>
     `;
   }
 }
 
+function getFileIcon(name){
+  const ext = name.split(".").pop().toLowerCase();
+
+  if(["png","jpg","jpeg","gif","webp"].includes(ext)) return "🖼️";
+  if(["pdf"].includes(ext)) return "📄";
+  if(["doc","docx"].includes(ext)) return "📝";
+  if(["xls","xlsx"].includes(ext)) return "📊";
+  if(["zip","rar"].includes(ext)) return "🗜️";
+  return "📁";
+}
+
 async function deleteFile(filePath){
+  if(!confirm("Voulez-vous supprimer ce fichier ?")) return;
+
   const { error } = await supabaseClient
     .storage
     .from("files")
     .remove([filePath]);
 
   if(error){
-    alert("Erreur suppression");
+    alert("Erreur suppression: " + error.message);
   }else{
     loadFiles();
   }
