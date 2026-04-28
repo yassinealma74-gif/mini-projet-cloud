@@ -33,10 +33,6 @@ body{
   text-align:center;
 }
 
-.login-card h1{
-  margin-bottom:10px;
-}
-
 .login-card input{
   width:100%;
   margin:10px 0;
@@ -53,20 +49,9 @@ button{
   font-weight:bold;
 }
 
-.primary{
-  background:#1a73e8;
-  color:white;
-}
-
-.secondary{
-  background:#e8f0fe;
-  color:#1a73e8;
-}
-
-.danger{
-  background:#ffe8e8;
-  color:#d93025;
-}
+.primary{background:#1a73e8;color:white}
+.secondary{background:#e8f0fe;color:#1a73e8}
+.danger{background:#ffe8e8;color:#d93025}
 
 .app{
   display:none;
@@ -79,7 +64,7 @@ button{
   left:0;
   width:230px;
   height:100vh;
-  background:#ffffff;
+  background:#fff;
   border-right:1px solid #e5e7eb;
   padding:22px;
 }
@@ -141,6 +126,7 @@ button{
   border-radius:18px;
   text-align:center;
   background:#f8fbff;
+  transition:0.3s;
 }
 
 .files-header{
@@ -153,7 +139,7 @@ button{
 .grid{
   margin-top:18px;
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
   gap:18px;
 }
 
@@ -177,6 +163,12 @@ button{
 .file-name{
   font-weight:bold;
   word-break:break-word;
+  margin-bottom:8px;
+}
+
+.file-info{
+  font-size:13px;
+  color:#6b7280;
   margin-bottom:14px;
 }
 
@@ -195,8 +187,6 @@ button{
   font-weight:bold;
   color:#1a73e8;
 }
-
-.hidden{display:none}
 
 @media(max-width:800px){
   .sidebar{
@@ -260,7 +250,13 @@ button{
 
     <div class="upload-box">
       <h2>Uploader un fichier</h2>
-      <div class="upload-zone">
+
+      <div class="upload-zone"
+           ondragover="event.preventDefault(); this.style.background='#e8f0fe';"
+           ondragleave="this.style.background='#f8fbff';"
+           ondrop="handleDrop(event)">
+
+        <p>Glisser-déposer un fichier ici ou choisir un fichier</p>
         <input type="file" id="fileInput">
         <button class="primary" onclick="uploadFile()">Upload</button>
         <p id="msg" class="msg"></p>
@@ -337,6 +333,18 @@ function showApp(){
   loadFiles();
 }
 
+function handleDrop(event){
+  event.preventDefault();
+  event.currentTarget.style.background = "#f8fbff";
+
+  const file = event.dataTransfer.files[0];
+
+  if(file){
+    document.getElementById("fileInput").files = event.dataTransfer.files;
+    uploadFile();
+  }
+}
+
 async function uploadFile(){
   const file = document.getElementById("fileInput").files[0];
   const msg = document.getElementById("msg");
@@ -406,15 +414,24 @@ async function renderFiles(){
       .createSignedUrl(filePath, 3600);
 
     const icon = getFileIcon(file.name);
+    const sizeKB = file.metadata && file.metadata.size ? (file.metadata.size / 1024).toFixed(1) : "0";
+    const date = file.created_at ? new Date(file.created_at).toLocaleDateString() : "-";
 
     grid.innerHTML += `
       <div class="file-card">
         <div class="file-icon">${icon}</div>
         <div class="file-name">${file.name}</div>
+        <div class="file-info">${sizeKB} KB • ${date}</div>
+
         <div class="actions">
+          <a href="${signedData.signedUrl}" download>
+            <button class="primary">Download</button>
+          </a>
+
           <a href="${signedData.signedUrl}" target="_blank">
             <button class="secondary">Ouvrir</button>
           </a>
+
           <button class="danger" onclick="deleteFile('${filePath}')">Supprimer</button>
         </div>
       </div>
