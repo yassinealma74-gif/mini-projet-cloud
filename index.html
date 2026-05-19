@@ -6,11 +6,7 @@
 <title>Mini Cloud Drive</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
 body{
   font-family:Arial,sans-serif;
@@ -26,7 +22,6 @@ body{
   background:
   linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
   url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
-
   background-size:cover;
   background-position:center;
 }
@@ -44,15 +39,8 @@ body{
   color:white;
 }
 
-.login-card h1{
-  font-size:32px;
-  margin-bottom:10px;
-}
-
-.login-card p{
-  margin-bottom:25px;
-  opacity:0.85;
-}
+.login-card h1{font-size:32px;margin-bottom:10px}
+.login-card p{margin-bottom:25px;opacity:0.85}
 
 .login-card input{
   width:100%;
@@ -66,9 +54,7 @@ body{
   font-size:15px;
 }
 
-.login-card input::placeholder{
-  color:#e5e7eb;
-}
+.login-card input::placeholder{color:#e5e7eb}
 
 button{
   border:none;
@@ -79,29 +65,13 @@ button{
   transition:0.3s;
 }
 
-button:hover{
-  transform:translateY(-2px);
-}
+button:hover{transform:translateY(-2px)}
 
-.primary{
-  background:#1a73e8;
-  color:white;
-}
+.primary{background:#1a73e8;color:white}
+.secondary{background:#ffffff;color:#1a73e8}
+.danger{background:#ffebeb;color:#d93025}
 
-.secondary{
-  background:#ffffff;
-  color:#1a73e8;
-}
-
-.danger{
-  background:#ffebeb;
-  color:#d93025;
-}
-
-.app{
-  display:none;
-  min-height:100vh;
-}
+.app{display:none;min-height:100vh}
 
 .sidebar{
   position:fixed;
@@ -127,12 +97,9 @@ button:hover{
   border-radius:14px;
   margin-bottom:10px;
   background:rgba(255,255,255,0.06);
-  transition:0.3s;
 }
 
-.menu-item:hover{
-  background:#1a73e8;
-}
+.menu-item:hover{background:#1a73e8}
 
 .main{
   margin-left:240px;
@@ -164,6 +131,20 @@ button:hover{
   box-shadow:0 4px 15px rgba(0,0,0,0.05);
 }
 
+.folder-box{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:15px 0 25px 0;
+}
+
+.folder-box input,
+.folder-box select{
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:12px;
+}
+
 .upload-zone{
   border:2px dashed #1a73e8;
   border-radius:18px;
@@ -173,8 +154,13 @@ button:hover{
   transition:0.3s;
 }
 
-.upload-zone:hover{
-  background:#eef5ff;
+.upload-zone:hover{background:#eef5ff}
+
+.files-header{
+  margin-top:30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 .grid{
@@ -192,9 +178,7 @@ button:hover{
   transition:0.3s;
 }
 
-.file-card:hover{
-  transform:translateY(-5px);
-}
+.file-card:hover{transform:translateY(-5px)}
 
 .file-icon{
   font-size:42px;
@@ -270,6 +254,7 @@ button:hover{
   <div class="sidebar">
     <div class="logo">☁️ CloudDrive</div>
     <div class="menu-item">📁 Mes fichiers</div>
+    <div class="menu-item">📂 Mes dossiers</div>
     <div class="menu-item">🔒 Espace privé</div>
     <div class="menu-item">☁️ Supabase Storage</div>
   </div>
@@ -286,6 +271,17 @@ button:hover{
     </div>
 
     <div class="upload-box">
+      <h2>Gestion des dossiers</h2>
+
+      <div class="folder-box">
+        <input type="text" id="folderName" placeholder="Nom du dossier">
+        <button class="secondary" onclick="createFolder()">Créer dossier</button>
+
+        <select id="folderSelect" onchange="loadFiles()">
+          <option value="">Racine</option>
+        </select>
+      </div>
+
       <h2>Uploader un fichier</h2>
 
       <div class="upload-zone"
@@ -320,6 +316,7 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let currentUser = null;
 let filesData = [];
+let folders = [];
 
 async function signUp(){
   const email = document.getElementById("email").value;
@@ -350,6 +347,7 @@ async function logout(){
   await supabaseClient.auth.signOut();
   currentUser = null;
   filesData = [];
+  folders = [];
   document.getElementById("authPage").style.display = "flex";
   document.getElementById("appPage").style.display = "none";
 }
@@ -367,7 +365,44 @@ function showApp(){
   document.getElementById("authPage").style.display = "none";
   document.getElementById("appPage").style.display = "block";
   document.getElementById("userEmail").innerHTML = "Connecté: " + currentUser.email;
+  loadFolders();
   loadFiles();
+}
+
+function createFolder(){
+  const folderName = document.getElementById("folderName").value.trim();
+
+  if(!folderName){
+    alert("Entrer le nom du dossier");
+    return;
+  }
+
+  if(folderName.includes("/") || folderName.includes("\\")){
+    alert("Le nom du dossier ne doit pas contenir / ou \\");
+    return;
+  }
+
+  if(folders.includes(folderName)){
+    alert("Ce dossier existe déjà");
+    return;
+  }
+
+  folders.push(folderName);
+  localStorage.setItem("folders_" + currentUser.id, JSON.stringify(folders));
+
+  document.getElementById("folderName").value = "";
+  loadFolders();
+}
+
+function loadFolders(){
+  folders = JSON.parse(localStorage.getItem("folders_" + currentUser.id)) || [];
+
+  const select = document.getElementById("folderSelect");
+  select.innerHTML = '<option value="">Racine</option>';
+
+  folders.forEach(folder => {
+    select.innerHTML += `<option value="${folder}">📂 ${folder}</option>`;
+  });
 }
 
 function handleDrop(event){
@@ -393,7 +428,15 @@ async function uploadFile(){
 
   msg.innerHTML = "Upload en cours...";
 
-  const filePath = currentUser.id + "/" + Date.now() + "_" + file.name;
+  const selectedFolder = document.getElementById("folderSelect").value;
+
+  let filePath = currentUser.id + "/";
+
+  if(selectedFolder){
+    filePath += selectedFolder + "/";
+  }
+
+  filePath += Date.now() + "_" + file.name;
 
   const { error } = await supabaseClient
     .storage
@@ -413,10 +456,18 @@ async function loadFiles(){
   const grid = document.getElementById("fileGrid");
   grid.innerHTML = "Chargement...";
 
+  const selectedFolder = document.getElementById("folderSelect").value;
+
+  let folderPath = currentUser.id;
+
+  if(selectedFolder){
+    folderPath += "/" + selectedFolder;
+  }
+
   const { data, error } = await supabaseClient
     .storage
     .from("files")
-    .list(currentUser.id);
+    .list(folderPath);
 
   if(error){
     grid.innerHTML = "Erreur chargement ❌ " + error.message;
@@ -430,6 +481,7 @@ async function loadFiles(){
 async function renderFiles(){
   const grid = document.getElementById("fileGrid");
   const search = document.getElementById("searchInput").value.toLowerCase();
+  const selectedFolder = document.getElementById("folderSelect").value;
 
   const filtered = filesData.filter(file =>
     file.name.toLowerCase().includes(search)
@@ -443,7 +495,13 @@ async function renderFiles(){
   }
 
   for(const file of filtered){
-    const filePath = currentUser.id + "/" + file.name;
+    let filePath = currentUser.id + "/";
+
+    if(selectedFolder){
+      filePath += selectedFolder + "/";
+    }
+
+    filePath += file.name;
 
     const { data: signedData } = await supabaseClient
       .storage
