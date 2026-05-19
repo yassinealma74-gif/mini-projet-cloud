@@ -28,7 +28,7 @@ body{
 
 .login-card{
   width:90%;
-  max-width:420px;
+  max-width:460px;
   padding:40px;
   border-radius:25px;
   background:rgba(255,255,255,0.12);
@@ -40,12 +40,12 @@ body{
 }
 
 .login-card h1{font-size:32px;margin-bottom:10px}
-.login-card p{margin-bottom:25px;opacity:0.85}
+.login-card p{margin-bottom:18px;opacity:0.85}
 
 .login-card input{
   width:100%;
   padding:14px;
-  margin:10px 0;
+  margin:8px 0;
   border:none;
   border-radius:12px;
   outline:none;
@@ -55,6 +55,16 @@ body{
 }
 
 .login-card input::placeholder{color:#e5e7eb}
+
+.auth-tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.auth-tabs button{
+  flex:1;
+}
 
 button{
   border:none;
@@ -121,6 +131,11 @@ button:hover{transform:translateY(-2px)}
   padding:14px;
   border:1px solid #ddd;
   border-radius:30px;
+}
+
+.user-box{
+  text-align:right;
+  line-height:1.7;
 }
 
 .upload-box{
@@ -209,6 +224,8 @@ button:hover{transform:translateY(-2px)}
   font-weight:bold;
 }
 
+.hidden{display:none}
+
 @media(max-width:800px){
   .sidebar{
     position:relative;
@@ -228,6 +245,10 @@ button:hover{transform:translateY(-2px)}
   .search{
     width:100%;
   }
+
+  .user-box{
+    text-align:center;
+  }
 }
 </style>
 </head>
@@ -237,13 +258,27 @@ button:hover{transform:translateY(-2px)}
 <div id="authPage" class="login-page">
   <div class="login-card">
     <h1>🔐 Mini Cloud Drive</h1>
-    <p>Connexion sécurisée</p>
+    <p>Plateforme sécurisée de stockage Cloud</p>
 
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Mot de passe">
+    <div class="auth-tabs">
+      <button class="primary" onclick="showLogin()">Connexion</button>
+      <button class="secondary" onclick="showRegister()">Créer compte</button>
+    </div>
 
-    <button class="primary" onclick="login()">Se connecter</button>
-    <button class="secondary" onclick="signUp()">Créer un compte</button>
+    <div id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPassword" placeholder="Mot de passe">
+      <button class="primary" onclick="login()">Se connecter</button>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <input type="text" id="nom" placeholder="Nom">
+      <input type="text" id="prenom" placeholder="Prénom">
+      <input type="email" id="registerEmail" placeholder="Email">
+      <input type="password" id="registerPassword" placeholder="Mot de passe">
+      <input type="password" id="confirmPassword" placeholder="Confirmer mot de passe">
+      <button class="primary" onclick="signUp()">Créer mon compte</button>
+    </div>
 
     <p id="authMsg"></p>
   </div>
@@ -265,6 +300,7 @@ button:hover{transform:translateY(-2px)}
       <input class="search" id="searchInput" placeholder="Rechercher un fichier..." onkeyup="renderFiles()">
 
       <div class="user-box">
+        <div id="welcomeUser"></div>
         <div id="userEmail"></div>
         <button class="danger" onclick="logout()">Déconnexion</button>
       </div>
@@ -318,24 +354,77 @@ let currentUser = null;
 let filesData = [];
 let folders = [];
 
+function showLogin(){
+  document.getElementById("loginForm").classList.remove("hidden");
+  document.getElementById("registerForm").classList.add("hidden");
+  document.getElementById("authMsg").innerHTML = "";
+}
+
+function showRegister(){
+  document.getElementById("registerForm").classList.remove("hidden");
+  document.getElementById("loginForm").classList.add("hidden");
+  document.getElementById("authMsg").innerHTML = "";
+}
+
 async function signUp(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const nom = document.getElementById("nom").value.trim();
+  const prenom = document.getElementById("prenom").value.trim();
+  const email = document.getElementById("registerEmail").value.trim();
+  const password = document.getElementById("registerPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const msg = document.getElementById("authMsg");
 
-  const { error } = await supabaseClient.auth.signUp({ email, password });
+  if(!nom || !prenom || !email || !password || !confirmPassword){
+    msg.innerHTML = "Veuillez remplir tous les champs.";
+    return;
+  }
 
-  document.getElementById("authMsg").innerHTML =
-    error ? "Erreur: " + error.message : "Compte créé ✅ Connecte-toi.";
+  if(password !== confirmPassword){
+    msg.innerHTML = "Les mots de passe ne sont pas identiques.";
+    return;
+  }
+
+  if(password.length < 6){
+    msg.innerHTML = "Le mot de passe doit contenir au moins 6 caractères.";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password,
+    options: {
+      data: {
+        nom: nom,
+        prenom: prenom
+      }
+    }
+  });
+
+  if(error){
+    msg.innerHTML = "Erreur: " + error.message;
+  }else{
+    msg.innerHTML = "Compte créé ✅ Connecte-toi maintenant.";
+    showLogin();
+  }
 }
 
 async function login(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const msg = document.getElementById("authMsg");
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if(!email || !password){
+    msg.innerHTML = "Veuillez entrer email et mot de passe.";
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
 
   if(error){
-    document.getElementById("authMsg").innerHTML = "Erreur: " + error.message;
+    msg.innerHTML = "Erreur: " + error.message;
     return;
   }
 
@@ -362,9 +451,18 @@ async function checkSession(){
 }
 
 function showApp(){
+  const nom = currentUser.user_metadata?.nom || "";
+  const prenom = currentUser.user_metadata?.prenom || "";
+
   document.getElementById("authPage").style.display = "none";
   document.getElementById("appPage").style.display = "block";
-  document.getElementById("userEmail").innerHTML = "Connecté: " + currentUser.email;
+
+  document.getElementById("welcomeUser").innerHTML =
+    "Bienvenue " + prenom + " " + nom;
+
+  document.getElementById("userEmail").innerHTML =
+    "Connecté: " + currentUser.email;
+
   loadFolders();
   loadFiles();
 }
@@ -503,10 +601,15 @@ async function renderFiles(){
 
     filePath += file.name;
 
-    const { data: signedData } = await supabaseClient
+    const { data: signedData, error } = await supabaseClient
       .storage
       .from("files")
       .createSignedUrl(filePath, 3600);
+
+    if(error){
+      console.log(error);
+      continue;
+    }
 
     const icon = getFileIcon(file.name);
     const sizeKB = file.metadata && file.metadata.size ? (file.metadata.size / 1024).toFixed(1) : "0";
