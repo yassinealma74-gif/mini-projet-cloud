@@ -39,6 +39,9 @@ body{
   color:white;
 }
 
+.login-card h1{font-size:32px;margin-bottom:10px}
+.login-card p{margin-bottom:18px;opacity:0.85}
+
 .login-card input{
   width:100%;
   padding:14px;
@@ -59,7 +62,9 @@ body{
   margin-bottom:18px;
 }
 
-.auth-tabs button{flex:1}
+.auth-tabs button{
+  flex:1;
+}
 
 button{
   border:none;
@@ -87,6 +92,7 @@ button:hover{transform:translateY(-2px)}
   background:#0f172a;
   color:white;
   padding:25px;
+  box-shadow:4px 0 15px rgba(0,0,0,0.1);
 }
 
 .logo{
@@ -103,6 +109,8 @@ button:hover{transform:translateY(-2px)}
   background:rgba(255,255,255,0.06);
 }
 
+.menu-item:hover{background:#1a73e8}
+
 .main{
   margin-left:240px;
   padding:25px;
@@ -115,6 +123,7 @@ button:hover{transform:translateY(-2px)}
   background:white;
   padding:20px;
   border-radius:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
 }
 
 .search{
@@ -124,13 +133,17 @@ button:hover{transform:translateY(-2px)}
   border-radius:30px;
 }
 
-.user-box{text-align:right;line-height:1.7}
+.user-box{
+  text-align:right;
+  line-height:1.7;
+}
 
 .upload-box{
   margin-top:25px;
   background:white;
   border-radius:20px;
   padding:25px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.05);
 }
 
 .folder-box{
@@ -153,7 +166,10 @@ button:hover{transform:translateY(-2px)}
   padding:35px;
   text-align:center;
   background:#f8fbff;
+  transition:0.3s;
 }
+
+.upload-zone:hover{background:#eef5ff}
 
 .files-header{
   margin-top:30px;
@@ -174,9 +190,15 @@ button:hover{transform:translateY(-2px)}
   border-radius:18px;
   padding:20px;
   box-shadow:0 4px 15px rgba(0,0,0,0.05);
+  transition:0.3s;
 }
 
-.file-icon{font-size:42px;margin-bottom:10px}
+.file-card:hover{transform:translateY(-5px)}
+
+.file-icon{
+  font-size:42px;
+  margin-bottom:10px;
+}
 
 .file-name{
   font-weight:bold;
@@ -205,11 +227,28 @@ button:hover{transform:translateY(-2px)}
 .hidden{display:none}
 
 @media(max-width:800px){
-  .sidebar{position:relative;width:100%;height:auto}
-  .main{margin-left:0}
-  .topbar{flex-direction:column;gap:12px}
-  .search{width:100%}
-  .user-box{text-align:center}
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+  }
+
+  .main{
+    margin-left:0;
+  }
+
+  .topbar{
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .search{
+    width:100%;
+  }
+
+  .user-box{
+    text-align:center;
+  }
 }
 </style>
 </head>
@@ -236,8 +275,7 @@ button:hover{transform:translateY(-2px)}
       <input type="text" id="nom" placeholder="Nom">
       <input type="text" id="prenom" placeholder="Prénom">
       <input type="email" id="registerEmail" placeholder="Email">
-      <input type="password" id="registerPassword" placeholder="Mot de passe" oninput="checkPasswordStrength()">
-      <div id="passwordStrength" style="margin-top:5px;font-weight:bold;"></div>
+      <input type="password" id="registerPassword" placeholder="Mot de passe">
       <input type="password" id="confirmPassword" placeholder="Confirmer mot de passe">
       <button class="primary" onclick="signUp()">Créer mon compte</button>
     </div>
@@ -307,7 +345,7 @@ button:hover{transform:translateY(-2px)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://zkvkmvylqsaggpxedfzz.supabase.co";
+const supabaseUrl = "https://zkykmvylqsaggpxedfzq.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpreWttdnlscXNhZ2dweGVkZnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjkxMDcsImV4cCI6MjA5MjgwNTEwN30.OjjounE02YBPcVvGFb8wTRD7FTzp0-Pcuy06Imz3KIc";
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -328,31 +366,6 @@ function showRegister(){
   document.getElementById("authMsg").innerHTML = "";
 }
 
-function checkPasswordStrength(){
-  const password = document.getElementById("registerPassword").value;
-  const strength = document.getElementById("passwordStrength");
-
-  const strongPassword =
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /[0-9]/.test(password) &&
-    /[^A-Za-z0-9]/.test(password);
-
-  if(password.length === 0){
-    strength.innerHTML = "";
-    return;
-  }
-
-  if(strongPassword){
-    strength.innerHTML = "Mot de passe fort ✅";
-    strength.style.color = "#22c55e";
-  }else{
-    strength.innerHTML = "Mot de passe faible ❌";
-    strength.style.color = "#ef4444";
-  }
-}
-
 async function signUp(){
   const nom = document.getElementById("nom").value.trim();
   const prenom = document.getElementById("prenom").value.trim();
@@ -371,15 +384,8 @@ async function signUp(){
     return;
   }
 
-  const strongPassword =
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /[0-9]/.test(password) &&
-    /[^A-Za-z0-9]/.test(password);
-
-  if(!strongPassword){
-    msg.innerHTML = "Mot de passe faible. Utilisez au moins 8 caractères avec majuscule, minuscule, chiffre et symbole.";
+  if(password.length < 6){
+    msg.innerHTML = "Le mot de passe doit contenir au moins 6 caractères.";
     return;
   }
 
@@ -397,13 +403,7 @@ async function signUp(){
   if(error){
     msg.innerHTML = "Erreur: " + error.message;
   }else{
-    msg.innerHTML = "Compte créé avec succès ✅ Connectez-vous maintenant.";
-    document.getElementById("nom").value = "";
-    document.getElementById("prenom").value = "";
-    document.getElementById("registerEmail").value = "";
-    document.getElementById("registerPassword").value = "";
-    document.getElementById("confirmPassword").value = "";
-    document.getElementById("passwordStrength").innerHTML = "";
+    msg.innerHTML = "Compte créé ✅ Connecte-toi maintenant.";
     showLogin();
   }
 }
